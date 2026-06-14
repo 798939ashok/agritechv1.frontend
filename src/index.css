@@ -1,0 +1,130 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Base ── */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: #030712;
+  color: #f9fafb;
+  min-height: 100vh;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* ════════════════════════════════════════
+   LIGHT MODE — when data-theme="light"
+   ════════════════════════════════════════ */
+[data-theme="light"] body,
+[data-theme="light"] {
+  background-color: #f0fdf4 !important;
+  color: #0f172a !important;
+}
+
+[data-theme="light"] .bg-gray-950   { background-color: #f0fdf4 !important; }
+[data-theme="light"] .bg-gray-900   { background-color: #e8f5e9 !important; }
+[data-theme="light"] .bg-gray-800   { background-color: #dcfce7 !important; }
+[data-theme="light"] .bg-gray-900\/60 { background-color: rgba(220,252,231,0.8) !important; }
+[data-theme="light"] .bg-gray-900\/40 { background-color: rgba(220,252,231,0.6) !important; }
+
+[data-theme="light"] .text-white    { color: #0f172a !important; }
+[data-theme="light"] .text-gray-400 { color: #4b5563 !important; }
+[data-theme="light"] .text-gray-500 { color: #6b7280 !important; }
+[data-theme="light"] .text-gray-600 { color: #374151 !important; }
+
+[data-theme="light"] .border-gray-800 { border-color: #bbf7d0 !important; }
+[data-theme="light"] .border-gray-700 { border-color: #86efac !important; }
+
+[data-theme="light"] .glass-card {
+  background: rgba(255,255,255,0.85) !important;
+  border: 1px solid rgba(34,197,94,0.2) !important;
+  box-shadow: 0 4px 24px rgba(34,197,94,0.06);
+}
+
+[data-theme="light"] .input-field {
+  background-color: #ffffff !important;
+  border-color: #d1fae5 !important;
+  color: #0f172a !important;
+}
+
+[data-theme="light"] nav,
+[data-theme="light"] .fixed {
+  background: rgba(255,255,255,0.95) !important;
+  border-color: rgba(34,197,94,0.15) !important;
+}
+
+[data-theme="light"] .skeleton {
+  background: linear-gradient(90deg, #dcfce7 25%, #bbf7d0 50%, #dcfce7 75%) !important;
+}
+
+/* ════════════════════════════════════
+   DARK MODE (default)
+   ════════════════════════════════════ */
+[data-theme="dark"] body,
+[data-theme="dark"] {
+  background-color: #030712 !important;
+  color: #f9fafb !important;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #111827; }
+::-webkit-scrollbar-thumb { background: #16a34a; border-radius: 3px; }
+
+/* ── Glassmorphism card ── */
+.glass-card {
+  background: rgba(255,255,255,0.06);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 1rem;
+}
+
+/* ── Green gradient text ── */
+.gradient-text {
+  background: linear-gradient(135deg, #4ade80, #16a34a);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Buttons ── */
+.btn-primary {
+  @apply bg-primary-600 hover:bg-primary-500 text-white font-semibold
+         px-6 py-3 rounded-xl transition-all duration-200
+         shadow-lg shadow-primary-900/40 active:scale-95;
+}
+.btn-secondary {
+  @apply border border-primary-600 text-primary-400 hover:bg-primary-600
+         hover:text-white font-semibold px-6 py-3 rounded-xl
+         transition-all duration-200 active:scale-95;
+}
+
+/* ── Input ── */
+.input-field {
+  @apply w-full bg-gray-900 border border-gray-700 rounded-xl
+         px-4 py-3 text-white placeholder-gray-500
+         focus:outline-none focus:border-primary-500
+         focus:ring-2 focus:ring-primary-500/20 transition-all;
+}
+
+/* ── Skeleton ── */
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, #1f2937 25%, #374151 50%, #1f2937 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 0.5rem;
+}
+
+/* ── Upload zone ── */
+.upload-zone {
+  @apply border-2 border-dashed border-primary-700 rounded-2xl
+         flex flex-col items-center justify-center cursor-pointer
+         hover:border-primary-500 hover:bg-primary-900/10
+         transition-all duration-300 min-h-[220px];
+}
