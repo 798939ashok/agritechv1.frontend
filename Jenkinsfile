@@ -13,14 +13,14 @@ pipeline {
         }
         stage('3.ippudu container ne deploy chesthuna'){
             steps{
-                sh 'docker rm -f agrifrontend || true',
+                sh 'docker rm -f agrifrontend || true'
                 sh 'docker run -d -p 3002:80 --name agrifrontend agrifrontend'
             }
         }
     }
         post{
             success{
-                echo 'success build',
+                echo 'success build'
                 echo 'localhost:3002'
             }
             failed{
