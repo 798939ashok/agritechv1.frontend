@@ -3,7 +3,7 @@ pipeline {
     stages{
         stage('1.code copy chesthuna from githu'){
             steps{
-                git branch: 'main',url: 'https://github.com/798939ashok/agritech.frontend.git'
+                git branch: 'main',url: 'https://github.com/798939ashok/agritechv1.frontend.git'
             }
         }
         stage('2. ippudu image build chesthuna'){
