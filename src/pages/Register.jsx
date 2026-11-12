@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Leaf, ArrowRight, ChevronDown } from 'lucide-react';
+import { Leaf, ArrowRight, ChevronDown, Eye, EyeOff } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import toast from 'react-hot-toast';
 import axios from 'axios';
@@ -20,16 +20,19 @@ const CROPS = [
 
 export default function Register() {
   const { login } = useApp();
-  const navigate  = useNavigate();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [showPass, setShowPass] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
-  // ✅ useRef — no re-render on every keystroke, focus never lost
-  const firstNameRef = useRef('');
-  const lastNameRef  = useRef('');
-  const phoneRef     = useRef('');
-  const districtRef  = useRef('');
-  const stateRef     = useRef('');
-  const cropRef      = useRef('');
+  const firstNameRef = useRef();
+  const lastNameRef  = useRef();
+  const phoneRef     = useRef();
+  const passwordRef  = useRef();
+  const confirmRef   = useRef();
+  const districtRef  = useRef();
+  const stateRef     = useRef();
+  const cropRef      = useRef();
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -37,35 +40,46 @@ export default function Register() {
     const firstName = firstNameRef.current.value.trim();
     const lastName  = lastNameRef.current.value.trim();
     const phone     = phoneRef.current.value.trim();
+    const password  = passwordRef.current.value;
+    const confirm   = confirmRef.current.value;
     const district  = districtRef.current.value.trim();
     const state     = stateRef.current.value;
     const mainCrop  = cropRef.current.value;
 
-    if (!firstName)           { toast.error('Enter first name'); firstNameRef.current.focus(); return; }
-    if (!lastName)            { toast.error('Enter last name');  lastNameRef.current.focus();  return; }
-    if (phone.length !== 10)  { toast.error('Enter valid 10-digit phone'); phoneRef.current.focus(); return; }
-    if (!state)               { toast.error('Select your state'); return; }
-    if (!district)            { toast.error('Enter your district'); districtRef.current.focus(); return; }
-    if (!mainCrop)            { toast.error('Select your main crop'); return; }
+    if (!firstName)          { toast.error('Enter first name'); firstNameRef.current.focus(); return; }
+    if (!lastName)           { toast.error('Enter last name');  lastNameRef.current.focus();  return; }
+    if (phone.length !== 10) { toast.error('Enter valid 10-digit phone'); phoneRef.current.focus(); return; }
+    if (password.length < 6) { toast.error('Password must be at least 6 characters'); passwordRef.current.focus(); return; }
+    if (password !== confirm) { toast.error('Passwords do not match'); confirmRef.current.focus(); return; }
+    if (!state)              { toast.error('Select your state'); return; }
+    if (!district)           { toast.error('Enter your district'); districtRef.current.focus(); return; }
+    if (!mainCrop)           { toast.error('Select your main crop'); return; }
 
     setLoading(true);
     try {
       const res = await axios.post(`${API_URL}/api/auth/register`, {
         name: `${firstName} ${lastName}`,
-        phone, district, state, main_crop: mainCrop,
+        phone, password, district, state,
+        main_crop: mainCrop, role: 'farmer',
       });
       login(res.data.user);
       toast.success('Account created! Welcome to AgriSense AI');
       navigate('/dashboard');
-    } catch {
-      // Demo fallback
-      login({
-        id: Date.now(),
-        name: `${firstName} ${lastName}`,
-        phone, state, district, main_crop: mainCrop,
-      });
-      toast.success('Registered successfully!');
-      navigate('/dashboard');
+    } catch (err) {
+      const msg = err.response?.data?.error || '';
+      if (msg.includes('already')) {
+        toast.error('Phone number already registered');
+      } else {
+        // Demo fallback
+        login({
+          id: Date.now(),
+          name: `${firstName} ${lastName}`,
+          phone, state, district,
+          main_crop: mainCrop, role: 'farmer',
+        });
+        toast.success('Registered successfully!');
+        navigate('/dashboard');
+      }
     } finally {
       setLoading(false);
     }
@@ -80,7 +94,6 @@ export default function Register() {
         animate={{ opacity: 1, y: 0 }}
         className="glass-card p-8 w-full max-w-lg relative z-10"
       >
-        {/* Header */}
         <div className="text-center mb-8">
           <div className="w-14 h-14 bg-primary-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
             <Leaf size={28} className="text-white" />
@@ -89,30 +102,16 @@ export default function Register() {
           <p className="text-gray-500 text-sm mt-1">Join AgriSense AI — free for all farmers</p>
         </div>
 
-        {/* ✅ Plain HTML form — no controlled state, no re-renders, no focus loss */}
-        <form onSubmit={handleRegister} className="space-y-5">
-
-          {/* Name row */}
+        <form onSubmit={handleRegister} className="space-y-4">
+          {/* Name */}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="text-sm text-gray-400 mb-2 block">First Name</label>
-              <input
-                ref={firstNameRef}
-                type="text"
-                placeholder="Ravi"
-                className="input-field"
-                required
-              />
+              <input ref={firstNameRef} type="text" placeholder="Ravi" className="input-field" required />
             </div>
             <div>
               <label className="text-sm text-gray-400 mb-2 block">Last Name</label>
-              <input
-                ref={lastNameRef}
-                type="text"
-                placeholder="Kumar"
-                className="input-field"
-                required
-              />
+              <input ref={lastNameRef} type="text" placeholder="Kumar" className="input-field" required />
             </div>
           </div>
 
@@ -120,14 +119,47 @@ export default function Register() {
           <div>
             <label className="text-sm text-gray-400 mb-2 block">Phone Number</label>
             <input
-              ref={phoneRef}
-              type="tel"
-              placeholder="9876543210"
-              className="input-field"
-              maxLength={10}
+              ref={phoneRef} type="tel" placeholder="9876543210"
+              className="input-field" maxLength={10}
               onKeyPress={e => { if (!/[0-9]/.test(e.key)) e.preventDefault(); }}
               required
             />
+          </div>
+
+          {/* Password */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm text-gray-400 mb-2 block">Password</label>
+              <div className="relative">
+                <input
+                  ref={passwordRef}
+                  type={showPass ? 'text' : 'password'}
+                  placeholder="Min 6 characters"
+                  className="input-field pr-10"
+                  required
+                />
+                <button type="button" onClick={() => setShowPass(!showPass)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300">
+                  {showPass ? <EyeOff size={15} /> : <Eye size={15} />}
+                </button>
+              </div>
+            </div>
+            <div>
+              <label className="text-sm text-gray-400 mb-2 block">Confirm Password</label>
+              <div className="relative">
+                <input
+                  ref={confirmRef}
+                  type={showConfirm ? 'text' : 'password'}
+                  placeholder="Re-enter password"
+                  className="input-field pr-10"
+                  required
+                />
+                <button type="button" onClick={() => setShowConfirm(!showConfirm)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300">
+                  {showConfirm ? <EyeOff size={15} /> : <Eye size={15} />}
+                </button>
+              </div>
+            </div>
           </div>
 
           {/* State + District */}
@@ -144,17 +176,11 @@ export default function Register() {
             </div>
             <div>
               <label className="text-sm text-gray-400 mb-2 block">District</label>
-              <input
-                ref={districtRef}
-                type="text"
-                placeholder="Your district"
-                className="input-field"
-                required
-              />
+              <input ref={districtRef} type="text" placeholder="Your district" className="input-field" required />
             </div>
           </div>
 
-          {/* Main Crop */}
+          {/* Crop */}
           <div>
             <label className="text-sm text-gray-400 mb-2 block">Main Crop</label>
             <div className="relative">
@@ -166,10 +192,8 @@ export default function Register() {
             </div>
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="btn-primary w-full flex items-center justify-center gap-2"
+          <button type="submit" disabled={loading}
+            className="btn-primary w-full flex items-center justify-center gap-2 mt-2"
           >
             {loading
               ? <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -178,11 +202,9 @@ export default function Register() {
           </button>
         </form>
 
-        <p className="text-center text-sm text-gray-500 mt-6">
+        <p className="text-center text-sm text-gray-500 mt-5">
           Already registered?{' '}
-          <Link to="/login" className="text-primary-400 hover:text-primary-300 font-semibold">
-            Login here
-          </Link>
+          <Link to="/login" className="text-primary-400 hover:text-primary-300 font-semibold">Login here</Link>
         </p>
       </motion.div>
     </div>
