@@ -23,7 +23,7 @@ pipeline {
                 echo 'success build'
                 echo 'localhost:3002'
             }
-            failed{
+            failure{
                 echo 'build failed'
             }
         }
